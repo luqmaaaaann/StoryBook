@@ -5,6 +5,9 @@ import {
 } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
+import Image from "next/image";
+import { on } from "node:events";
+import { ComponentProps } from "react";
 
 const avatarVariants = cva("block rounded-full overflow-hidden", {
   variants: {
@@ -23,18 +26,29 @@ const avatarVariants = cva("block rounded-full overflow-hidden", {
 type AvatarVariantProps = VariantProps<typeof avatarVariants>;
 export type Size = AvatarVariantProps["size"];
 
-type Props = { isOnline: boolean } & AvatarVariantProps;
+type Props = { isOnline: boolean; onClick?: () => void } & AvatarVariantProps &
+  Pick<ComponentProps<typeof AvatarImage>, "alt" | "src">;
 
-export default function Avatar({ size, isOnline }: Props) {
+export default function Avatar({ size, isOnline, src, alt, onClick }: Props) {
   return (
-    <div className="relative inline-block">
-      <DefaultAvatar className={cn(avatarVariants({ size }))}>
+    <div className="relative inline-block size-fit">
+      <DefaultAvatar className={cn(avatarVariants({ size }))} onClick={onClick}>
         <AvatarImage
           className="aspect-square size-full object-cover"
-          src="https://github.com/shadcn.png"
+          src={src}
+          alt={alt}
         />
-        <AvatarFallback>CN</AvatarFallback>
+        <AvatarFallback>
+          <Image
+            className="aspect-square size-full object-cover"
+            src="https://img.icons8.com/?size=100&id=23265&format=png&color=000000"
+            width={40}
+            height={40}
+            alt="Placeholder Image"
+          />
+        </AvatarFallback>
       </DefaultAvatar>
+
       {isOnline && (
         <span
           className={cn(
@@ -43,6 +57,7 @@ export default function Avatar({ size, isOnline }: Props) {
             "border border-white",
             size === "sm" || size === "md" ? "size-2" : "size-3"
           )}
+          data-testid="presence-indicator"
         />
       )}
     </div>
